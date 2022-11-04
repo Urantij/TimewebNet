@@ -9,16 +9,17 @@ using TimewebNet.Models;
 
 namespace TimeWebNet
 {
-    public class TimeWebApi
+    public class TimeWebApi : IDisposable
     {
         public string? AccessToken { get; private set; }
 
         readonly HttpClient client;
+        readonly bool disposeClient = false;
 
         public TimeWebApi()
             : this(new HttpClient())
         {
-
+            disposeClient = true;
         }
 
         public TimeWebApi(HttpClient client)
@@ -137,7 +138,8 @@ namespace TimeWebNet
 
         public void Dispose()
         {
-            client.Dispose();
+            if (disposeClient)
+                client.Dispose();
         }
     }
 }
