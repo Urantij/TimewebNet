@@ -40,7 +40,7 @@ namespace TimeWebNet
         /// <param name="refreshToken"></param>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
-        public async Task<string> GetTokenAsync(string refreshToken)
+        public async Task<AuthResponseModel> GetTokenAsync(string refreshToken)
         {
             using var message = new HttpRequestMessage(HttpMethod.Post, "https://public-api.timeweb.com/api/v2/auth");
 
@@ -60,7 +60,7 @@ namespace TimeWebNet
 
                 SetAccessToken(auth.Access_token);
 
-                return auth.Refresh_token;
+                return auth;
             }
             else
             {
