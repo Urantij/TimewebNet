@@ -36,7 +36,7 @@ else
 
 System.Console.WriteLine("Создаём ведро.");
 
-var createBucketResponse = await api.S3Bucket.CreateBucketAsync("testbucket", S3ServiceType.Promo);
+var createBucketResponse = await api.S3Bucket.CreateBucketAsync("testbucket", true, S3ServiceType.Promo);
 
 ListBucketsResponseModel.StorageModel bucketStorage;
 {
