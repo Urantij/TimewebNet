@@ -11,6 +11,10 @@ namespace TimewebNet.Models
         /// </summary>
         Promo = 389,
         /// <summary>
+        /// 100GB
+        /// </summary>
+        Lite = 473,
+        /// <summary>
         /// 250GB
         /// </summary>
         Start = 383

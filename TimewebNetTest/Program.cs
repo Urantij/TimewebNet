@@ -17,14 +17,16 @@ if (configLines.Length == 1)
 {
     System.Console.WriteLine("Берём токен.");
 
-    refreshToken = await api.GetTokenAsync(refreshToken);
+    var auth = await api.GetTokenAsync(refreshToken);
+
+    refreshToken = auth.Refresh_token;
 
     System.Console.WriteLine("Сохраняем токен.");
 
     await File.WriteAllLinesAsync(configPath, new string[]
     {
-        refreshToken,
-        api.AccessToken!
+        auth.Refresh_token,
+        auth.Access_token
     });
 }
 else
@@ -34,7 +36,7 @@ else
 
 System.Console.WriteLine("Создаём ведро.");
 
-long bucketId = await api.CreateBucketAsync("testbucket", S3ServiceType.Promo);
+var createBucketResponse = await api.S3Bucket.CreateBucketAsync("testbucket", S3ServiceType.Promo);
 
 ListBucketsResponseModel.StorageModel bucketStorage;
 {
@@ -48,9 +50,9 @@ ListBucketsResponseModel.StorageModel bucketStorage;
 
         System.Console.WriteLine($"Сосём вёдра... {attempts}");
 
-        var buckets = await api.ListBucketsAsync();
+        var listResponse = await api.S3Bucket.ListBucketsAsync();
 
-        var ourBucket = buckets.FirstOrDefault(b => b.Id == bucketId);
+        var ourBucket = listResponse.Storages.FirstOrDefault(b => b.Id == createBucketResponse.Storage.Id);
 
         if (ourBucket != null)
         {
@@ -106,8 +108,14 @@ System.Console.WriteLine("Берём обратно.");
     }
 }
 
+System.Console.WriteLine("Меняем ведро...");
+
+await api.S3Bucket.ChangeBucketAsync(createBucketResponse.Storage.Id, S3ServiceType.Lite);
+
+System.Console.WriteLine("Изменили.");
+
 System.Console.WriteLine("Окей... удаляем ведро.");
-await api.DeleteBucketAsync(bucketId);
+await api.S3Bucket.DeleteBucketAsync(createBucketResponse.Storage.Id);
 
 System.Console.WriteLine("Удалили.");
 
