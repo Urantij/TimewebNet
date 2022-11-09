@@ -17,14 +17,16 @@ if (configLines.Length == 1)
 {
     System.Console.WriteLine("Берём токен.");
 
-    refreshToken = await api.GetTokenAsync(refreshToken);
+    var auth = await api.GetTokenAsync(refreshToken);
+
+    refreshToken = auth.Refresh_token;
 
     System.Console.WriteLine("Сохраняем токен.");
 
     await File.WriteAllLinesAsync(configPath, new string[]
     {
-        refreshToken,
-        api.AccessToken!
+        auth.Refresh_token,
+        auth.Access_token
     });
 }
 else
