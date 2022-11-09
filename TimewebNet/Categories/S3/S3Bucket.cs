@@ -14,12 +14,12 @@ public class S3Bucket : CategoryApi
     {
     }
 
-    public async Task<CreateBucketResponseModel> CreateBucketAsync(string name, S3ServiceType serviceType)
+    public async Task<CreateBucketResponseModel> CreateBucketAsync(string name, bool @private, S3ServiceType serviceType)
     {
         var body = new
         {
             name = name,
-            type = "private",
+            type = @private ? "private" : "public",
             service_type = (int)serviceType
         };
 
