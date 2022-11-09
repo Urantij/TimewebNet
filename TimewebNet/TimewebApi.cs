@@ -4,142 +4,142 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using TimewebNet.Categories.S3;
 using TimewebNet.Exceptions;
 using TimewebNet.Models;
 
-namespace TimeWebNet
+namespace TimeWebNet;
+
+public class TimeWebApi : IDisposable
 {
-    public class TimeWebApi : IDisposable
+    public string? AccessToken { get; private set; }
+
+    public S3Bucket S3Bucket { get; private set; }
+
+    public readonly HttpClient client;
+    readonly bool disposeClient = false;
+
+    public TimeWebApi()
+        : this(new HttpClient())
     {
-        public string? AccessToken { get; private set; }
+        disposeClient = true;
+    }
 
-        readonly HttpClient client;
-        readonly bool disposeClient = false;
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="client">Не забудь его задиспоузить</param>
+    public TimeWebApi(HttpClient client)
+    {
+        this.client = client;
 
-        public TimeWebApi()
-            : this(new HttpClient())
+        S3Bucket = new S3Bucket(this);
+    }
+
+    public void SetAccessToken(string accessToken)
+    {
+        AccessToken = accessToken;
+        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", AccessToken);
+    }
+
+    public async Task CallAsync(string url, HttpMethod method, object body)
+    {
+        using var message = new HttpRequestMessage(method, url);
+
+        using var httpContent = new StringContent(JsonConvert.SerializeObject(body), Encoding.UTF8, "application/json");
+        message.Content = httpContent;
+
+        var response = await client.SendAsync(message);
+
+        string responseContent = await response.Content.ReadAsStringAsync();
+
+        if (!response.IsSuccessStatusCode)
         {
-            disposeClient = true;
+            throw new BadCodeException(response.StatusCode, responseContent);
         }
+    }
 
-        public TimeWebApi(HttpClient client)
+    public async Task<T> CallAsync<T>(string url, HttpMethod method, object body)
+    {
+        using var message = new HttpRequestMessage(method, url);
+
+        using var httpContent = new StringContent(JsonConvert.SerializeObject(body), Encoding.UTF8, "application/json");
+        message.Content = httpContent;
+
+        var response = await client.SendAsync(message);
+
+        string responseContent = await response.Content.ReadAsStringAsync();
+
+        if (response.IsSuccessStatusCode)
         {
-            this.client = client;
-        }
+            var deserialized = JsonConvert.DeserializeObject<T>(responseContent)!;
 
-        public void SetAccessToken(string accessToken)
+            return deserialized;
+        }
+        else
         {
-            AccessToken = accessToken;
-            client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", AccessToken);
+            throw new BadCodeException(response.StatusCode, responseContent);
         }
+    }
 
-        /// <summary>
-        /// Возвращает новый рефрештокен.
-        /// Использованный токен больше работать не будет, так что новый лучше сохрани.
-        /// </summary>
-        /// <param name="refreshToken"></param>
-        /// <returns></returns>
-        /// <exception cref="Exception"></exception>
-        public async Task<AuthResponseModel> GetTokenAsync(string refreshToken)
+    public async Task CallAsync(string url, HttpMethod method)
+    {
+        using var message = new HttpRequestMessage(method, url);
+
+        var response = await client.SendAsync(message);
+
+        string responseContent = await response.Content.ReadAsStringAsync();
+
+        if (!response.IsSuccessStatusCode)
         {
-            using var message = new HttpRequestMessage(HttpMethod.Post, "https://public-api.timeweb.com/api/v2/auth");
-
-            using var httpContent = new StringContent(JsonConvert.SerializeObject(new
-            {
-                refresh_token = refreshToken
-            }), Encoding.UTF8, "application/json");
-            message.Content = httpContent;
-
-            var response = await client.SendAsync(message);
-
-            string responseContent = await response.Content.ReadAsStringAsync();
-
-            if (response.IsSuccessStatusCode)
-            {
-                var auth = JsonConvert.DeserializeObject<AuthResponseModel>(responseContent)!;
-
-                SetAccessToken(auth.Access_token);
-
-                return auth;
-            }
-            else
-            {
-                throw new BadCodeException(response.StatusCode, responseContent, nameof(GetTokenAsync));
-            }
+            throw new BadCodeException(response.StatusCode, responseContent);
         }
+    }
 
-        public async Task<long> CreateBucketAsync(string name, S3ServiceType serviceType)
+    public async Task<T> CallAsync<T>(string url, HttpMethod method)
+    {
+        using var message = new HttpRequestMessage(method, url);
+
+        var response = await client.SendAsync(message);
+
+        string responseContent = await response.Content.ReadAsStringAsync();
+
+        if (response.IsSuccessStatusCode)
         {
-            using var message = new HttpRequestMessage(HttpMethod.Post, "https://public-api.timeweb.com/api/v1/storages/buckets");
+            var deserialized = JsonConvert.DeserializeObject<T>(responseContent)!;
 
-            using var httpContent = new StringContent(JsonConvert.SerializeObject(new
-            {
-                name = name,
-                type = "private",
-                service_type = (int)serviceType
-            }), Encoding.UTF8, "application/json");
-            message.Content = httpContent;
-
-            var response = await client.SendAsync(message);
-
-            string responseContent = await response.Content.ReadAsStringAsync();
-
-            if (response.IsSuccessStatusCode)
-            {
-                var deserialized = JsonConvert.DeserializeObject<CreateBucketResponseModel>(responseContent)!;
-
-                return deserialized.Storage.Id;
-            }
-            else
-            {
-                throw new BadCodeException(response.StatusCode, responseContent, nameof(CreateBucketAsync));
-            }
+            return deserialized;
         }
-
-        public async Task<ListBucketsResponseModel.StorageModel[]> ListBucketsAsync()
+        else
         {
-            using var message = new HttpRequestMessage(HttpMethod.Get, "https://public-api.timeweb.com/api/v1/storages/buckets");
-
-            var response = await client.SendAsync(message);
-
-            string responseContent = await response.Content.ReadAsStringAsync();
-
-            if (response.IsSuccessStatusCode)
-            {
-                var deserialized = JsonConvert.DeserializeObject<ListBucketsResponseModel>(responseContent)!;
-
-                return deserialized.Storages;
-            }
-            else
-            {
-                throw new BadCodeException(response.StatusCode, responseContent, nameof(ListBucketsAsync));
-            }
+            throw new BadCodeException(response.StatusCode, responseContent);
         }
+    }
 
-        public async Task DeleteBucketAsync(long id)
+    /// <summary>
+    /// Возвращает новый рефрештокен.
+    /// Использованный токен больше работать не будет, так что новый лучше сохрани.
+    /// </summary>
+    /// <param name="refreshToken"></param>
+    /// <returns></returns>
+    /// <exception cref="Exception"></exception>
+    public async Task<AuthResponseModel> GetTokenAsync(string refreshToken)
+    {
+        var body = new
         {
-            using var message = new HttpRequestMessage(HttpMethod.Delete, $"https://public-api.timeweb.com/api/v1/storages/buckets/{id}");
+            refresh_token = refreshToken
+        };
 
-            using var httpContent = new StringContent(JsonConvert.SerializeObject(new
-            {
-                storage_id = id
-            }), Encoding.UTF8, "application/json");
-            message.Content = httpContent;
+        var response = await CallAsync<AuthResponseModel>("https://public-api.timeweb.com/api/v2/auth", HttpMethod.Post, body);
 
-            var response = await client.SendAsync(message);
+        SetAccessToken(response.Access_token);
 
-            string responseContent = await response.Content.ReadAsStringAsync();
+        return response;
+    }
 
-            if (!response.IsSuccessStatusCode)
-            {
-                throw new BadCodeException(response.StatusCode, responseContent, nameof(DeleteBucketAsync));
-            }
-        }
-
-        public void Dispose()
-        {
-            if (disposeClient)
-                client.Dispose();
-        }
+    public void Dispose()
+    {
+        if (disposeClient)
+            client.Dispose();
     }
 }

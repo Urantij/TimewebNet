@@ -10,14 +10,12 @@ namespace TimewebNet.Exceptions
     {
         public HttpStatusCode Code { get; private set; }
         public string Content { get; private set; }
-        public string Where { get; private set; }
 
-        public BadCodeException(HttpStatusCode code, string content, string where)
-            : base($"Плохой код вернулся. {code} ({where})\n{content}")
+        public BadCodeException(HttpStatusCode code, string content)
+            : base($"Плохой код вернулся. {code} \n{content}")
         {
             Code = code;
             Content = content;
-            Where = where;
         }
     }
 }
