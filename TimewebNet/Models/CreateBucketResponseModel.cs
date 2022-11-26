@@ -8,23 +8,12 @@ namespace TimewebNet.Models
 {
     public class CreateBucketResponseModel
     {
-        public class StorageModel
-        {
-            [JsonProperty(Required = Required.Always)]
-            public long Id { get; set; }
-
-            public StorageModel(long id)
-            {
-                Id = id;
-            }
-        }
-
         [JsonProperty(Required = Required.Always)]
-        public StorageModel Storage { get; set; }
+        public BaseBucketModel Bucket { get; set; }
 
-        public CreateBucketResponseModel(StorageModel storage)
+        public CreateBucketResponseModel(BaseBucketModel bucket)
         {
-            Storage = storage;
+            Bucket = bucket;
         }
     }
 }
