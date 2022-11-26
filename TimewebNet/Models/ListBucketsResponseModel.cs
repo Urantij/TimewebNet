@@ -8,56 +8,23 @@ namespace TimewebNet.Models
 {
     public class ListBucketsResponseModel
     {
-        public class StorageModel
+        public class BucketModel : BaseBucketModel
         {
-            [JsonProperty(Required = Required.Always)]
-            public long Id { get; set; }
-
-            /// <summary>
-            /// [имяаккаунта]-[указанноеимя]
-            /// </summary>
-            [JsonProperty(Required = Required.Always)]
-            public string Name { get; set; }
-
             [JsonProperty(Required = Required.Always)]
             public string Password { get; set; }
 
-            [JsonProperty(Required = Required.Always)]
-            public string Region { get; set; }
-
-            [JsonProperty(Required = Required.Always)]
-            public long Service_type { get; set; }
-
-            /// <summary>
-            /// Должно быть created
-            /// </summary>
-            [JsonProperty(Required = Required.Always)]
-            public string Status { get; set; }
-
-            /// <summary>
-            /// private public
-            /// </summary>
-            [JsonProperty(Required = Required.Always)]
-            public string Type { get; set; }
-
-            public StorageModel(long id, string name, string password, string region, long service_type, string status, string type)
+            public BucketModel(long id, string name, string region, long preset_id, string status, string type, string password) : base(id, name, region, preset_id, status, type)
             {
-                Id = id;
-                Name = name;
                 Password = password;
-                Region = region;
-                Service_type = service_type;
-                Status = status;
-                Type = type;
             }
         }
 
         [JsonProperty(Required = Required.Always)]
-        public StorageModel[] Storages { get; set; }
+        public BucketModel[] Buckets { get; set; }
 
-        public ListBucketsResponseModel(StorageModel[] storages)
+        public ListBucketsResponseModel(BucketModel[] buckets)
         {
-            this.Storages = storages;
+            this.Buckets = buckets;
         }
     }
 }

@@ -14,13 +14,13 @@ public class S3Bucket : CategoryApi
     {
     }
 
-    public async Task<CreateBucketResponseModel> CreateBucketAsync(string name, bool @private, S3ServiceType serviceType)
+    public async Task<CreateBucketResponseModel> CreateBucketAsync(string name, bool @private, S3ServiceType preset_id)
     {
         var body = new
         {
             name = name,
             type = @private ? "private" : "public",
-            service_type = (int)serviceType
+            preset_id = (int)preset_id
         };
 
         var response = await api.CallAsync<CreateBucketResponseModel>("https://public-api.timeweb.com/api/v1/storages/buckets", HttpMethod.Post, body);
@@ -39,16 +39,16 @@ public class S3Bucket : CategoryApi
     /// 
     /// </summary>
     /// <param name="id"></param>
-    /// <param name="newServiceType">Новый сервистайп должен быть больше старого. В гигабайтах больше.</param>
+    /// <param name="preset_id">Новый презет_айди должен быть больше старого. В гигабайтах больше.</param>
     /// <returns></returns>
-    public async Task ChangeBucketAsync(long id, S3ServiceType newServiceType)
+    public async Task<ChangeBucketResponseModel> ChangeBucketAsync(long id, S3ServiceType preset_id)
     {
         var body = new
         {
-            service_type = (int)newServiceType
+            preset_id = (int)preset_id
         };
 
-        await api.CallAsync($"https://public-api.timeweb.com/api/v1/storages/buckets/{id}", HttpMethod.Patch, body);
+        return await api.CallAsync<ChangeBucketResponseModel>($"https://public-api.timeweb.com/api/v1/storages/buckets/{id}", HttpMethod.Patch, body);
     }
 
     public async Task DeleteBucketAsync(long id)

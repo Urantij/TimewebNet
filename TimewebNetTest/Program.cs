@@ -38,7 +38,7 @@ System.Console.WriteLine("Создаём ведро.");
 
 var createBucketResponse = await api.S3Bucket.CreateBucketAsync("testbucket", true, S3ServiceType.Promo);
 
-ListBucketsResponseModel.StorageModel bucketStorage;
+ListBucketsResponseModel.BucketModel bucketStorage;
 {
     int attempts = 0;
 
@@ -52,7 +52,7 @@ ListBucketsResponseModel.StorageModel bucketStorage;
 
         var listResponse = await api.S3Bucket.ListBucketsAsync();
 
-        var ourBucket = listResponse.Storages.FirstOrDefault(b => b.Id == createBucketResponse.Storage.Id);
+        var ourBucket = listResponse.Buckets.FirstOrDefault(b => b.Id == createBucketResponse.Bucket.Id);
 
         if (ourBucket != null)
         {
@@ -110,12 +110,12 @@ System.Console.WriteLine("Берём обратно.");
 
 System.Console.WriteLine("Меняем ведро...");
 
-await api.S3Bucket.ChangeBucketAsync(createBucketResponse.Storage.Id, S3ServiceType.Lite);
+await api.S3Bucket.ChangeBucketAsync(createBucketResponse.Bucket.Id, S3ServiceType.Lite);
 
 System.Console.WriteLine("Изменили.");
 
 System.Console.WriteLine("Окей... удаляем ведро.");
-await api.S3Bucket.DeleteBucketAsync(createBucketResponse.Storage.Id);
+await api.S3Bucket.DeleteBucketAsync(createBucketResponse.Bucket.Id);
 
 System.Console.WriteLine("Удалили.");
 
