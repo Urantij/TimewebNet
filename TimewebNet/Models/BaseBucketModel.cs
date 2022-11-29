@@ -18,7 +18,7 @@ public class BaseBucketModel
     public string Name { get; set; }
 
     [JsonProperty(Required = Required.Always)]
-    public string Region { get; set; }
+    public string Location { get; set; }
 
     [JsonProperty(Required = Required.Always)]
     public long Preset_id { get; set; }
@@ -35,11 +35,11 @@ public class BaseBucketModel
     [JsonProperty(Required = Required.Always)]
     public string Type { get; set; }
 
-    public BaseBucketModel(long id, string name, string region, long preset_id, string status, string type)
+    public BaseBucketModel(long id, string name, string location, long preset_id, string status, string type)
     {
         Id = id;
         Name = name;
-        Region = region;
+        Location = location;
         Preset_id = preset_id;
         Status = status;
         Type = type;

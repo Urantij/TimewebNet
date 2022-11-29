@@ -34,6 +34,9 @@ else
     api.SetAccessToken(configLines[1]);
 }
 
+System.Console.WriteLine("Смотрим вёдра.");
+await api.S3Bucket.ListBucketsAsync();
+
 System.Console.WriteLine("Создаём ведро.");
 
 var createBucketResponse = await api.S3Bucket.CreateBucketAsync("testbucket", true, S3ServiceType.Promo);
@@ -63,12 +66,9 @@ ListBucketsResponseModel.BucketModel bucketStorage;
 
 }
 
-string username = bucketStorage.Name.Split('-')[0];
-string secret = bucketStorage.Password;
-
-MinioClient s3Client = new MinioClient().WithCredentials(username, secret)
+MinioClient s3Client = new MinioClient().WithCredentials(bucketStorage.Access_key, bucketStorage.Secret_key)
                                         .WithEndpoint("s3.timeweb.com")
-                                        .WithRegion(bucketStorage.Region)
+                                        .WithRegion(bucketStorage.Location)
                                         .WithSSL()
                                         .Build();
 

@@ -10,12 +10,20 @@ namespace TimewebNet.Models
     {
         public class BucketModel : BaseBucketModel
         {
-            [JsonProperty(Required = Required.Always)]
-            public string Password { get; set; }
+            /// <summary>
+            /// Логин аккаунта
+            /// </summary>
+            public string Access_key { get; set; }
+            /// <summary>
+            /// Пароль аккаунта
+            /// </summary>
+            public string Secret_key { get; set; }
 
-            public BucketModel(long id, string name, string region, long preset_id, string status, string type, string password) : base(id, name, region, preset_id, status, type)
+            public BucketModel(long id, string name, string region, long preset_id, string status, string type, string access_key, string secret_key)
+                : base(id, name, region, preset_id, status, type)
             {
-                Password = password;
+                Access_key = access_key;
+                Secret_key = secret_key;
             }
         }
 
