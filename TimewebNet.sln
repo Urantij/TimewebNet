@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TimewebNet", "TimewebNet\Ti
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TimewebNetTest", "TimewebNetTest\TimewebNetTest.csproj", "{F204BC26-DEE3-4CBB-AD69-BD2123217949}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TimewebNetTestAWS", "TimewebNetTestAWS\TimewebNetTestAWS.csproj", "{4738F33C-16ED-4CE6-80DD-4D9EBE7A2A9A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +26,9 @@ Global
 		{F204BC26-DEE3-4CBB-AD69-BD2123217949}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F204BC26-DEE3-4CBB-AD69-BD2123217949}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F204BC26-DEE3-4CBB-AD69-BD2123217949}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4738F33C-16ED-4CE6-80DD-4D9EBE7A2A9A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4738F33C-16ED-4CE6-80DD-4D9EBE7A2A9A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4738F33C-16ED-4CE6-80DD-4D9EBE7A2A9A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4738F33C-16ED-4CE6-80DD-4D9EBE7A2A9A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
