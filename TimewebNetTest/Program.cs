@@ -1,38 +1,16 @@
 ﻿using System.Security.Cryptography;
 using Minio;
+using TimewebNet.Categories.S3;
 using TimewebNet.Models;
 using TimeWebNet;
 
 const string configPath = "testconfig.txt";
 
-string[] configLines = (await File.ReadAllLinesAsync(configPath)).Where(l => !string.IsNullOrEmpty(l)).ToArray();
+string token = File.ReadAllLines(configPath)[0];
 
 Console.WriteLine("Hello, World!");
 
-string refreshToken = configLines[0];
-
-TimeWebApi api = new();
-
-if (configLines.Length == 1)
-{
-    System.Console.WriteLine("Берём токен.");
-
-    var auth = await api.GetTokenAsync(refreshToken);
-
-    refreshToken = auth.Refresh_token;
-
-    System.Console.WriteLine("Сохраняем токен.");
-
-    await File.WriteAllLinesAsync(configPath, new string[]
-    {
-        auth.Refresh_token,
-        auth.Access_token
-    });
-}
-else
-{
-    api.SetAccessToken(configLines[1]);
-}
+TimeWebApi api = new(token);
 
 System.Console.WriteLine("Смотрим вёдра.");
 await api.S3Bucket.ListBucketsAsync();
@@ -41,7 +19,7 @@ System.Console.WriteLine("Создаём ведро.");
 
 var createBucketResponse = await api.S3Bucket.CreateBucketAsync("testbucket", true, S3ServiceType.Promo);
 
-ListBucketsResponseModel.BucketModel bucketStorage;
+BucketModel bucketStorage;
 {
     int attempts = 0;
 
@@ -66,8 +44,8 @@ ListBucketsResponseModel.BucketModel bucketStorage;
 
 }
 
-MinioClient s3Client = new MinioClient().WithCredentials(bucketStorage.Access_key, bucketStorage.Secret_key)
-                                        .WithEndpoint("s3.timeweb.com")
+MinioClient s3Client = new MinioClient().WithCredentials(bucketStorage.AccessKey, bucketStorage.SecretKey)
+                                        .WithEndpoint(bucketStorage.Hostname)
                                         .WithRegion(bucketStorage.Location)
                                         .WithSSL()
                                         .Build();

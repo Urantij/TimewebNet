@@ -10,9 +10,9 @@
             "request": "launch",
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/TimewebNetTestAWS/bin/Debug/net7.0/TimewebNetTestAWS.dll",
+            "program": "${workspaceFolder}/TimewebNetTest/bin/Debug/net7.0/TimewebNetTest.dll",
             "args": [],
-            "cwd": "${workspaceFolder}/TimewebNetTestAWS",
+            "cwd": "${workspaceFolder}/TimewebNetTest",
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
             "console": "internalConsole",
             "stopAtEntry": false
