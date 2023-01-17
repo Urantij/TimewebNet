@@ -12,15 +12,22 @@ namespace TimeWebNet;
 
 public class TimeWebApi : IDisposable
 {
-    public string? AccessToken { get; private set; }
+    readonly string token;
+
+    readonly Uri baseUri = new("https://api.timeweb.cloud");
 
     public S3Bucket S3Bucket { get; private set; }
 
     public readonly HttpClient client;
     readonly bool disposeClient = false;
 
-    public TimeWebApi()
-        : this(new HttpClient())
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="token">https://timeweb.cloud/my/api-keys</param>
+    /// <param name="baseUri"></param>
+    public TimeWebApi(string token, Uri? baseUri = null)
+        : this(token, new HttpClient(), baseUri)
     {
         disposeClient = true;
     }
@@ -28,23 +35,27 @@ public class TimeWebApi : IDisposable
     /// <summary>
     /// 
     /// </summary>
-    /// <param name="client">Не забудь его задиспоузить</param>
-    public TimeWebApi(HttpClient client)
+    /// <param name="token">https://timeweb.cloud/my/api-keys</param>
+    /// <param name="client">Не забудь его задиспоузить.</param>
+    public TimeWebApi(string token, HttpClient client, Uri? baseUri = null)
     {
+        this.token = token;
         this.client = client;
+
+        if (baseUri != null)
+        {
+            this.baseUri = baseUri;
+        }
 
         S3Bucket = new S3Bucket(this);
     }
 
-    public void SetAccessToken(string accessToken)
+    public async Task CallAsync(string apiPath, HttpMethod method, object body)
     {
-        AccessToken = accessToken;
-        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", AccessToken);
-    }
+        Uri uri = new(baseUri, apiPath);
 
-    public async Task CallAsync(string url, HttpMethod method, object body)
-    {
-        using var message = new HttpRequestMessage(method, url);
+        using var message = new HttpRequestMessage(method, uri);
+        message.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
         using var httpContent = new StringContent(JsonConvert.SerializeObject(body), Encoding.UTF8, "application/json");
         message.Content = httpContent;
@@ -59,9 +70,12 @@ public class TimeWebApi : IDisposable
         }
     }
 
-    public async Task<T> CallAsync<T>(string url, HttpMethod method, object body)
+    public async Task<T> CallAsync<T>(string apiPath, HttpMethod method, object body)
     {
-        using var message = new HttpRequestMessage(method, url);
+        Uri uri = new(baseUri, apiPath);
+
+        using var message = new HttpRequestMessage(method, uri);
+        message.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
         using var httpContent = new StringContent(JsonConvert.SerializeObject(body), Encoding.UTF8, "application/json");
         message.Content = httpContent;
@@ -82,9 +96,12 @@ public class TimeWebApi : IDisposable
         }
     }
 
-    public async Task CallAsync(string url, HttpMethod method)
+    public async Task CallAsync(string apiPath, HttpMethod method)
     {
-        using var message = new HttpRequestMessage(method, url);
+        Uri uri = new(baseUri, apiPath);
+
+        using var message = new HttpRequestMessage(method, uri);
+        message.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
         var response = await client.SendAsync(message);
 
@@ -96,9 +113,12 @@ public class TimeWebApi : IDisposable
         }
     }
 
-    public async Task<T> CallAsync<T>(string url, HttpMethod method)
+    public async Task<T> CallAsync<T>(string apiPath, HttpMethod method)
     {
-        using var message = new HttpRequestMessage(method, url);
+        Uri uri = new(baseUri, apiPath);
+
+        using var message = new HttpRequestMessage(method, uri);
+        message.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
         var response = await client.SendAsync(message);
 
@@ -114,27 +134,6 @@ public class TimeWebApi : IDisposable
         {
             throw new BadCodeException(response.StatusCode, responseContent);
         }
-    }
-
-    /// <summary>
-    /// Возвращает новый рефрештокен.
-    /// Использованный токен больше работать не будет, так что новый лучше сохрани.
-    /// </summary>
-    /// <param name="refreshToken"></param>
-    /// <returns></returns>
-    /// <exception cref="Exception"></exception>
-    public async Task<AuthResponseModel> GetTokenAsync(string refreshToken)
-    {
-        var body = new
-        {
-            refresh_token = refreshToken
-        };
-
-        var response = await CallAsync<AuthResponseModel>("https://public-api.timeweb.com/api/v2/auth", HttpMethod.Post, body);
-
-        SetAccessToken(response.Access_token);
-
-        return response;
     }
 
     public void Dispose()
